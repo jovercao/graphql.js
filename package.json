@@ -1,6 +1,6 @@
 {
   "name": "@jovercao/graphql.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "GraphQL Client for TypeScript, fork from f/graphql.js",
   "main": "graphql.js",
   "directories": {
@@ -9,7 +9,8 @@
   },
   "files": [
     "graphql.js",
-    "graphql.min.js"
+    "graphql.min.js",
+    "graphql.d.ts"
   ],
   "scripts": {
     "test": "make test",
