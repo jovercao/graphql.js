@@ -33,7 +33,7 @@
 
   if (typeof XMLHttpRequest !== 'undefined') {
     function __doRequest(
-      method, url, contentType, accept, headers, body, _onRequestError, callback
+      method, url, contentType, accept, headers, body, callback
     ) {
       var xhr = new XMLHttpRequest
       xhr.open(method, url, true)
@@ -53,7 +53,7 @@
     }
   } else if (typeof require === 'function') {
     function __doRequest(
-      method, url, contentType, accept, headers, body, onRequestError, callback
+      method, url, contentType, accept, headers, body, callback
     ) {
       var http = require('http'), https = require('https'), URL = require('url'), uri = URL.parse(url)
       var req = (uri.protocol === 'https:' ? https : http).request({
@@ -71,20 +71,12 @@
           callback(JSON.parse(str), response.statusCode)
         })
       })
-      if (typeof onRequestError === 'function') {
-        req.on('error', function (err) {
-          onRequestError(err);
-        });
-      }
       req.write(body)
       req.end()
     }
   }
 
-  function __request(debug, method, url, headers, data, asJson, onRequestError, callback) {
-    if (!url) {
-      return;
-    }
+  function __request(debug, method, url, headers, data, asJson, callback) {
     if (asJson) {
       var body = JSON.stringify({query: data.query, variables: data.variables});
     } else {
@@ -113,7 +105,6 @@
       'application/json',
       headers,
       body,
-      onRequestError,
       callback
     )
   }
@@ -318,15 +309,18 @@
         if (!requestOptions) requestOptions = {}
         if (!variables) variables = {}
         var fragmentedQuery = that.buildQuery(query, variables)
-        headers = __extend((that.options.headers||{}), (requestOptions.headers||{}))
+        const headers = __extend((that.options.headers||{}), (requestOptions.headers||{}))
 
         return new Promise(function (resolve, reject) {
           __request(debug, that.options.method || "post", that.getUrl(), headers, {
             query: fragmentedQuery,
             variables: that.cleanAutoDeclareAnnotations(variables)
-          }, !!that.options.asJSON, that.options.onRequestError, function (response, status) {
+          }, !!that.options.asJSON, function (response, status) {
             if (status == 200) {
               if (response.errors) {
+                if (that.options.onGraphqlError) {
+                  that.options.onGraphqlError(response.errors)
+                }
                 reject(response.errors)
               } else if (response.data) {
                 resolve(response.data)
@@ -334,6 +328,9 @@
                 resolve(response)
               }
             } else {
+              if (that.options.onRequestError) {
+                that.options.onRequestError(response, status)
+              }
               reject(response)
             }
           })
