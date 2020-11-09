@@ -1,15 +1,6 @@
 //declare module 'graphql.js' {
 
-import { DocumentNode } from 'graphql'
-
-export type GraphqlResponse<T = any> = {
-  errors?: GraphqlError[]
-  data: T
-}
-
-export interface GraphqlError {
-  message: string
-}
+import { DocumentNode, FormattedExecutionResult, GraphQLError, GraphQLFormattedError } from 'graphql'
 
 export type FragmentOptions = {
   [key: string]: string | FragmentOptions
@@ -30,8 +21,8 @@ export type HttpRequest = (options: {
 }>
 
 export type GraphqlRequest<A extends Record<string, any> = Record<string, any>, R = any> = {
-  (args?: A): Promise<GraphqlResponse<R>>
-  merge(name: string, args: A): Promise<GraphqlResponse<R>>
+  (args?: A): Promise<R>
+  merge(name: string, args: A): Promise<R>
 }
 
 export type GraphqlClientOptions = {
@@ -53,16 +44,14 @@ export type GraphqlClientOptions = {
   /**
    * 当请求Graphql遇到错误时
    */
-  onGraphqlError?: (errors: GraphqlError[]) => void
+  onGraphqlError?: (errors: GraphQLFormattedError[]) => void
 }
 
 export type GraphqlClient = {
-  <A extends Record<string, any> = Record<string, any>, R = any>(gql: string | DocumentNode, variables: A): Promise<
-    GraphqlRespose<R>
-  >
+  <A extends Record<string, any> = Record<string, any>, R = any>(gql: string | DocumentNode, variables: A): Promise<R>
   <A extends Record<string, any> = Record<string, any>, R = any>(gql: string | DocumentNode): (
     variables: A
-  ) => Promise<GraphqlRespose<R>>
+  ) => Promise<R>
 
   getUrl(): string
   setUrl(url: string): void
@@ -84,11 +73,12 @@ export type GraphqlClient = {
   fragment(name: string): string
   fragment(options: FragmentOptions): void
   fragments(): Record<string, string>
-  commit<R1, R2, R3>(name: string): Promise<GraphqlResponse<R1 & R2 & R3>>
+  commit<R1, R2, R3 = {}, R4 = {}, R5 = {}>(name: string): Promise<R1 & R2 & R3 & R4 & R5>
 }
 
 export type GraphqlClientFactory = (url: string, config?: GraphqlClientOptions) => GraphqlClient
 declare const graphqlFactory: GraphqlClientFactory
 export default graphqlFactory
 export = graphqlFactory
+
 //}
