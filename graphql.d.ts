@@ -79,6 +79,5 @@ export type GraphqlClient = {
 export type GraphqlClientFactory = (url: string, config?: GraphqlClientOptions) => GraphqlClient
 declare const graphqlFactory: GraphqlClientFactory
 export default graphqlFactory
-export = graphqlFactory
 
 //}
