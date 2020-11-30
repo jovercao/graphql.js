@@ -22,7 +22,7 @@ export type HttpRequest = (options: {
 
 export type GraphqlRequest<A extends Record<string, any> = Record<string, any>, R = any> = {
   (args?: A): Promise<R>
-  merge(name: string, args: A): Promise<R>
+  merge(name: string, args?: A): Promise<R>
 }
 
 export type GraphqlClientOptions = {
